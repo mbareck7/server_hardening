@@ -1,7 +1,10 @@
 This repos aim to provide the initial required security hardening on a new Debian-like systems
 
 We use an ansible-playbook, it contains two roles as bellow
-    * server_hardening
+
+=======
+    1. server_hardening
+>>>>>>> 955f13c (patch README.md file)
         * Update & upgrade
         * Create a sysadmin user
         * Document system specifications
@@ -12,7 +15,8 @@ We use an ansible-playbook, it contains two roles as bellow
         * Install fail2ban
         * Setup a cronjob for local backup
         * Setup a cronjob for remote backup
-    * rkhunter [from this repo](https://github.com/maxlareo/ansible-rkhunter)
+        
+    2. rkhunter [from this repo](https://github.com/maxlareo/ansible-rkhunter)
         * Install rkhunter
 
 ## Usage
