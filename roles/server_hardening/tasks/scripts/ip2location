@@ -1,0 +1,3 @@
+#!/bin/bash
+
+last | ~/workflow/scripts/regex/ip | xargs -n1 -I{} curl ipinfo.io/{}\?token=getFreeValideToken

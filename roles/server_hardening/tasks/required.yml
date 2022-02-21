@@ -1,0 +1,30 @@
+---
+- name: Install required packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  with_items:
+    - pwgen
+    - sshpass
+    - acl
+
+- name: Generate ssh keys
+  become: true
+  become_user: "{{ sysadmin_user }}"
+  shell:
+    cmd: "ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y >/dev/null 2>&1"
+  args:
+    executable: /bin/bash
+  with_items:
+    - sysadmin_user
+
+- name: Copy ssh key to backup server(So remote backup will work)
+  become_user: "{{ sysadmin_user }}"
+  shell:
+    cmd: "sshpass -p {{backup_server_password}} ssh-copy-id -o StrictHostKeyChecking=no -p {{backup_server_ssh_port}} {{backup_server_user}}@{{backup_server_ip}}"
+  args:
+    executable: /bin/bash
+  with_items:
+    - sysadmin_user

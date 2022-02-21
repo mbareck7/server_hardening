@@ -1,0 +1,78 @@
+---
+
+  - name: update & upgrade 
+    include_tasks: update.yml
+
+  - name: Delete sysamin user
+    include_tasks: del_sysadmin_user.yml
+
+  - name: Create sysamin user
+    include_tasks: add_sysadmin_user.yml
+  
+
+  - name: install required packages
+    include_tasks: required.yml
+   
+    # become_user: sysadmin
+
+  - name: Document system specifications
+    script: ./scripts/server_specifications.sh > /home/sysadmin/system_specifications.txt
+
+  - name: Backup existing rules
+    command: rsync -vuzar /etc/ufw /home/sysadmin/ufw_backup
+
+  - name: Firewall setup
+    script: ./scripts/server_firewall_rules.sh
+
+  - name: Sysadmin scripts transfer
+    copy:
+      owner: sysadmin
+      group: sysadmin
+      src: ./scripts/
+      dest: /home/sysadmin/.scripts
+      mode: 0655
+      # directory_mode: yes
+      
+  # - name: Patch sysadmin .scripts folder permission
+  #   ansible.builtin.file:
+  #     path: /home/sysadmin/.scripts
+  #     owner: sysadmin
+  #     group: sysadmin
+  #     mode: '0644'
+
+  - name: Add hardened SSH config
+    copy:
+      dest: /etc/ssh/sshd_config
+      src: etc/ssh/sshd_config
+      owner: root
+      group: root
+      mode: 0600
+
+  - name: Restart SSH
+    service:
+      name: ssh
+      state: restarted
+
+  - name: Install fail2ban
+    include_tasks: fail2ban.yml
+
+  - name: setup a cronjob for local backup
+    changed_when: false
+    cron:
+      name: local backup
+      minute: "*"
+      hour: "*"
+      user: "{{sysadmin_user}}"
+      job: '/usr/bin/bash /home/sysadmin/.scripts/server_backup_local.sh {{local_backup_folder}}'
+      cron_file: local_backup
+
+
+  - name: setup a cronjob for remote backup
+    changed_when: false
+    cron:
+      name: remote backup
+      minute: "*"
+      hour: "*"
+      user: "{{sysadmin_user}}"
+      job: '/usr/bin/bash /home/sysadmin/.scripts/server_backup_remote.sh {{backup_server_ip}} {{backup_server_user}} {{local_backup_folder}} {{backup_server_ssh_port}} {{backup_server_folder}}'
+      cron_file: remote_backup

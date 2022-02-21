@@ -1,0 +1,12 @@
+---
+- name: Let's harden our servers
+  hosts: prod_new_servers
+  remote_user: sysadmin
+  become: true
+  
+  roles:
+  - server_hardening
+  - rkhunter
+  # - pentest
+
+  # tasks:

@@ -1,0 +1,35 @@
+---
+- name: Add sysadmin user
+  user:
+    name: sysadmin 
+    password: "{{ sysadmin_hash512_password }}"
+    state:  present
+    shell:  /bin/bash
+    
+- name: Grant sudo privileges to sysadmin user
+  user: 
+    name: sysadmin
+    groups: sudo
+    append: yes
+
+
+- name: Make sure we have a 'sysadmin' group
+  group:
+    name: sysadmin
+    state: present
+
+- name: Passwordless sysadmin
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%sysadmin'
+    line: '%sysadmin ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+
+  
+
+- name: Add SSH public key for sysadmin user
+  authorized_key:
+    user: sysadmin
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    state: present

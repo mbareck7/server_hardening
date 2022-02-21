@@ -1,0 +1,7 @@
+---
+- name: Delete sysadmin user
+  user:
+    name: sysadmin
+    state: absent
+    remove: yes
+    force: yes

@@ -1,0 +1,107 @@
+---
+sudo: required
+dist: trusty
+language: python
+python:
+  - "2.7"
+
+services:
+  - docker
+
+env:
+  - distro: debian9
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    ansible_version: latest
+  - distro: debian9
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    ansible_version: 2.4.0.0
+  - distro: debian9
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    ansible_version: 2.3.0.0
+  - distro: debian9
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    ansible_version: 2.2.0.0
+  - distro: debian9
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    ansible_version: 2.1.0.0
+  - distro: debian9
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    ansible_version: 2.0.0.0
+  - distro: debian8
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    ansible_version: latest
+  - distro: ubuntu1604
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    ansible_version: latest
+  - distro: ubuntu1404
+    init: /sbin/init
+    run_opts: ""
+    ansible_version: latest
+
+before_install:
+  - 'docker pull geerlingguy/docker-${distro}-ansible:latest'
+
+install: true
+before_script:
+  - container_id=$(mktemp)
+  - >
+    docker run --detach --volume="${PWD}":/etc/ansible/roles/role_under_test:ro
+    ${run_opts} geerlingguy/docker-${distro}-ansible:latest
+    "${init}" > "${container_id}"
+  - >
+    if [[ "$ansible_version" != "latest" ]];
+    then docker exec "$(cat ${container_id})" bash -c "
+    pip install ansible==$ansible_version";
+    fi
+  - >
+    if [[ "$ansible_version" == "latest" && "$distro" == "debian9" ]];
+    then docker exec "$(cat ${container_id})" bash -c "
+    pip install ansible-lint &&
+    pip install yamllint";
+    fi
+
+script:
+  # Check the role/playbook's syntax.
+  - >
+    docker exec "$(cat ${container_id})"
+    ansible-playbook --syntax-check
+    /etc/ansible/roles/role_under_test/tests/test.yml
+
+  # Run the role/playbook with ansible-playbook.
+  - >
+    docker exec "$(cat ${container_id})"
+    ansible-playbook -vvvv /etc/ansible/roles/role_under_test/tests/test.yml
+
+  # Run the role/playbook again, checking to make sure it's idempotent.
+  - >
+    docker exec "$(cat ${container_id})" bash -c "
+    ansible-playbook /etc/ansible/roles/role_under_test/tests/test.yml
+    | grep -q 'changed=0.*failed=0'
+    && (echo 'Idempotence test: pass' && exit 0)
+    || (echo 'Idempotence test: fail' && exit 1)"
+
+  - >
+    if [[ "$ansible_version" == "latest" && "$distro" == "debian9" ]];
+    then docker exec "$(cat ${container_id})" bash -c "
+    ansible-lint /etc/ansible/roles/role_under_test/tests/test.yml";
+    fi
+
+  - >
+    if [[ "$ansible_version" == "latest" && "$distro" == "debian9" ]];
+    then docker exec "$(cat ${container_id})" bash -c "
+    yamllint /etc/ansible/roles/role_under_test/";
+    fi
+
+after_script:
+  - docker rm -f "$(cat ${container_id})"
+
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/

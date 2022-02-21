@@ -1,0 +1,21 @@
+ansible_user: user1
+ansible_host: 192.168.1.30
+ansible_ssh_port: 22
+ansible_ssh_pass: user1
+become: true
+ansible_become_password: user1
+server_network_interface : eno1
+local_backup_folder: /home/sysadmin/backup
+sysadmin_user: sysadmin
+sysadmin_password: "changeme"
+# Must Generate a password using gen_user_hashed_pw.sh at roles/server_hardening/tasks/scripts, dont' forget to note the password somewhere
+sysadmin_hash512_password: $6$32ioDPO7Zqtd9G4O$MMDNMMGeS2jQ1xDRodiGxlsbLw2T/BU/3aggZc/.HMFSxrvHGIY1bFMfjaMB0mZ9mo0Sd//c/cEyg8huy90V50
+
+#backup server config 
+backup_server_ip: 192.168.1.40
+backup_server_ssh_port: 22
+backup_server_user: user1
+backup_server_folder: /home/user1 # the backup folder on the backup server
+backup_server_password: changeme
+
+
