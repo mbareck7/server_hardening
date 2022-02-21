@@ -1,6 +1,6 @@
 This repos aim to provide the initial required security hardening on a new Debian-like systems
 
-We use an ansible-playbook, it contains two roles as bellow :
+We use an ansible-playbook, it contains two roles as bellow
     * server_hardening
         * Update & upgrade
         * Create a sysadmin user
