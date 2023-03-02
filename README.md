@@ -23,6 +23,8 @@ clone the project, adjust the inventories/prod_server_1.yml
 
 to adjust firewall config go to ./roles/server_hardening/tasks/scripts/server_firewall_rules.sh
 
+Adjust the ssh port in the roles/server hardening/tasks/etc/ssh/sshd_config file according to the ssh port allowed through the firewall.
+
 Make sure the configured user for backup can connect through ssh passwordless to backup server, you may have to allow password authentication on the backup server if it's disabled (go to /etc/ssh/ssd_config and make sure that this is set  : ``` PasswordAuthentication yes ``` )
 
 
