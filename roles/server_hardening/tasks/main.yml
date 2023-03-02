@@ -10,8 +10,8 @@
     include_tasks: add_sysadmin_user.yml
   
 
-  - name: install required packages
-    include_tasks: required.yml
+  # - name: install required packages
+  #   include_tasks: required.yml
    
     # become_user: sysadmin
 
@@ -67,12 +67,12 @@
       cron_file: local_backup
 
 
-  - name: setup a cronjob for remote backup
-    changed_when: false
-    cron:
-      name: remote backup
-      minute: "*"
-      hour: "*"
-      user: "{{sysadmin_user}}"
-      job: '/usr/bin/bash /home/sysadmin/.scripts/server_backup_remote.sh {{backup_server_ip}} {{backup_server_user}} {{local_backup_folder}} {{backup_server_ssh_port}} {{backup_server_folder}}'
-      cron_file: remote_backup
+  # - name: setup a cronjob for remote backup
+  #   changed_when: false
+  #   cron:
+  #     name: remote backup
+  #     minute: "*"
+  #     hour: "*"
+  #     user: "{{sysadmin_user}}"
+  #     job: '/usr/bin/bash /home/sysadmin/.scripts/server_backup_remote.sh {{backup_server_ip}} {{backup_server_user}} {{local_backup_folder}} {{backup_server_ssh_port}} {{backup_server_folder}}'
+  #     cron_file: remote_backup
